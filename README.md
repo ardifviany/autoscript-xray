@@ -17,6 +17,8 @@ manual.
 Fitur pengelolaan:
 
 - Membuat akun berdasarkan protokol.
+- Menentukan password Trojan/Shadowsocks sendiri atau membuatnya otomatis.
+- UUID VMess/VLESS dibuat otomatis.
 - Menghapus dan memperpanjang akun.
 - Menonaktifkan akun yang kedaluwarsa secara otomatis.
 - Mengganti domain dan memperbarui sertifikat.
@@ -69,6 +71,11 @@ menu
 
 Panel utama menyediakan pengelolaan akun, restart layanan, informasi server,
 daftar port, dan pengaturan domain/sertifikat.
+
+Saat membuat akun Trojan atau Shadowsocks, tekan `Enter` pada kolom password
+jika ingin sistem membuatnya otomatis. Password manual harus terdiri dari 6-64
+karakter huruf, angka, titik, garis bawah, atau tanda minus. UUID VMess dan
+VLESS selalu dibuat otomatis.
 
 Panel lanjutan dapat dibuka dengan:
 

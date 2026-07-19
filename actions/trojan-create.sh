@@ -39,8 +39,14 @@ until [[ $user =~ ^[a-zA-Z0-9_]+$ && ${user_EXISTS} == '0' ]]; do
 			exit 1
 		fi
 	done
+read -rp "Password Trojan (kosong = otomatis): " uuid
+if [[ -z "$uuid" ]]; then
+	uuid=$(cat /proc/sys/kernel/random/uuid)
+elif [[ ! "$uuid" =~ ^[A-Za-z0-9._-]{6,64}$ ]]; then
+	echo "Password harus 6-64 karakter: huruf, angka, titik, _, atau -."
+	exit 1
+fi
 read -p "Expired (Days) : " masaaktif
-uuid=$(cat /proc/sys/kernel/random/uuid)
 hariini=`date -d "0 days" +"%Y-%m-%d"`
 exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
 sed -i '/#trojanws$/a\#&# '"$user $exp"'\
@@ -60,7 +66,7 @@ echo -e "Remarks  : ${user}"
 echo -e "IP/Host  : ${MYIP}"
 echo -e "Address  : ${domain}"
 echo -e "Port     : ${tr}"
-echo -e "Key      : ${uuid}"
+echo -e "Password : ${uuid}"
 echo -e "Created  : $hariini"
 echo -e "Expired  : $exp"
 echo -e "=========================="

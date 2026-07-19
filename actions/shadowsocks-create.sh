@@ -24,7 +24,6 @@ fi
 clear
 IP=$(wget -qO- ipinfo.io/ip);
 
-uuid=$(cat /proc/sys/kernel/random/uuid)
 tls="$(cat ~/log-install.txt | grep -w "XRAYS SHADOWSOCKS WS TLS " | cut -d: -f2|sed 's/ //g')"
 nontls="$(cat ~/log-install.txt | grep -w "XRAYS SHADOWSOCKS WS HTTP " | cut -d: -f2|sed 's/ //g')"
 
@@ -44,6 +43,13 @@ until [[ $user =~ ^[a-zA-Z0-9_]+$ && ${CLIENT_EXISTS} == '0' ]]; do
 			exit 1
 		fi
 	done
+read -rp "Password Shadowsocks (kosong = otomatis): " uuid
+if [[ -z "$uuid" ]]; then
+	uuid=$(cat /proc/sys/kernel/random/uuid)
+elif [[ ! "$uuid" =~ ^[A-Za-z0-9._-]{6,64}$ ]]; then
+	echo "Password harus 6-64 karakter: huruf, angka, titik, _, atau -."
+	exit 1
+fi
 read -p "Expired (Days) : " masaaktif
 hariini=`date -d "0 days" +"%Y-%m-%d"`
 exp=`date -d "$masaaktif days" +"%Y-%m-%d"`

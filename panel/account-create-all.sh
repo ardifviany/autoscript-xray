@@ -54,12 +54,19 @@ clear
 #
 #
 uuid=$(cat /proc/sys/kernel/random/uuid)
+read -rp "Password Trojan/Shadowsocks (kosong = otomatis): " vpn_password
+if [[ -z "$vpn_password" ]]; then
+	vpn_password=$(cat /proc/sys/kernel/random/uuid)
+elif [[ ! "$vpn_password" =~ ^[A-Za-z0-9._-]{6,64}$ ]]; then
+	echo "Password harus 6-64 karakter: huruf, angka, titik, _, atau -."
+	exit 1
+fi
 read -p "Expired (days): " masaaktif
 exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
 sed -i '/#trojanws$/a\#! '"$user $exp"'\
-},{"password": "'""$uuid""'","email": "'""$user""'"' /etc/xray/config.json
+},{"password": "'""$vpn_password""'","email": "'""$user""'"' /etc/xray/config.json
 sed -i '/#trojangrpc$/a\#! '"$user $exp"'\
-},{"password": "'""$uuid""'","email": "'""$user""'"' /etc/xray/config.json
+},{"password": "'""$vpn_password""'","email": "'""$user""'"' /etc/xray/config.json
 
 sed -i '/#vless$/a\#& '"$user $exp"'\
 },{"id": "'""$uuid""'","email": "'""$user""'"' /etc/xray/config.json
@@ -80,17 +87,17 @@ vlesslinknon="vless://${uuid}@${domain}:80?path=/xrayws&encryption=none&type=ws#
 vlesslinkgrpc="vless://${uuid}@${domain}:443?mode=gun&security=tls&encryption=none&type=grpc&serviceName=vless-grpc&sni=bug.com#${user}"
 
 #buattrojan
-trojanlinkgrpc="trojan://${uuid}@${domain}:443?mode=gun&security=tls&type=grpc&serviceName=trojan-grpc&sni=bug.com#${user}"
-trojanlinkws="trojan://${uuid}@${domain}:443?path=/xraytrojanws&security=tls&host=bug.com&type=ws&sni=bug.com#${user}"
+trojanlinkgrpc="trojan://${vpn_password}@${domain}:443?mode=gun&security=tls&type=grpc&serviceName=trojan-grpc&sni=bug.com#${user}"
+trojanlinkws="trojan://${vpn_password}@${domain}:443?path=/xraytrojanws&security=tls&host=bug.com&type=ws&sni=bug.com#${user}"
 
 #buatshadowsocks
 #
 cipher="aes-128-gcm"
 sed -i '/#ssws$/a\### '"$user $exp"'\
-},{"password": "'""$uuid""'","method": "'""$cipher""'","email": "'""$user""'"' /etc/xray/config.json
+},{"password": "'""$vpn_password""'","method": "'""$cipher""'","email": "'""$user""'"' /etc/xray/config.json
 sed -i '/#ssgrpc$/a\### '"$user $exp"'\
-},{"password": "'""$uuid""'","method": "'""$cipher""'","email": "'""$user""'"' /etc/xray/config.json
-echo $cipher:$uuid > /tmp/log
+},{"password": "'""$vpn_password""'","method": "'""$cipher""'","email": "'""$user""'"' /etc/xray/config.json
+echo $cipher:$vpn_password > /tmp/log
 shadowsocks_base64=$(cat /tmp/log)
 echo -n "${shadowsocks_base64}" | base64 > /tmp/log1
 shadowsocks_base64e=$(cat /tmp/log1)
@@ -149,7 +156,7 @@ cat > /home/vps/public_html/ss-ws-$user.txt <<-END
             "address": "$domain",
             "level": 8,
             "method": "$cipher",
-            "password": "$uuid",
+            "password": "$vpn_password",
             "port": 443
           }
         ]
@@ -256,7 +263,7 @@ cat > /home/vps/public_html/ss-grpc-$user.txt <<-END
             "address": "$domain",
             "level": 8,
             "method": "$cipher",
-            "password": "$uuid",
+            "password": "$vpn_password",
             "port": 443
           }
         ]
@@ -320,7 +327,8 @@ echo -e "====== JEVLAYER XRAY SERVER ======" | tee -a /etc/log-create-user.log
 echo -e "INFORMASI AKUN VPN XRAY" | tee -a /etc/log-create-user.log
 echo -e "IP: $MYIP" | tee -a /etc/log-create-user.log
 echo -e "Host/Domain: $domain" | tee -a /etc/log-create-user.log
-echo -e "Password/ID: $uuid" | tee -a /etc/log-create-user.log
+echo -e "UUID VMess/VLESS       : $uuid" | tee -a /etc/log-create-user.log
+echo -e "Password Trojan/SS     : $vpn_password" | tee -a /etc/log-create-user.log
 echo -e "====== Service Port =======" | tee -a /etc/log-create-user.log
 echo -e "Websocket TLS  : 443" | tee -a /etc/log-create-user.log
 echo -e "Websocket HTTP : 80" | tee -a /etc/log-create-user.log
